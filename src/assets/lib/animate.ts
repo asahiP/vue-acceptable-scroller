@@ -36,17 +36,16 @@ export default function ({
         elapsed = 0
       }
 
-      switch(true) {
-        case Math.abs(end) > Math.abs(start):
-          handle && window.cancelAnimationFrame(handle)
-          handle = window.requestAnimationFrame(
-            _timeStamp => animate(_timeStamp, elapsed + _timeStamp - timeStamp)
-          )
-          break
-        case Math.abs(start) - Math.abs(end) > 1e-5:
+      if (Math.abs(end) > Math.abs(start)) {
+        handle && window.cancelAnimationFrame(handle)
+        handle = window.requestAnimationFrame(
+          _timeStamp => animate(_timeStamp, elapsed + _timeStamp - timeStamp)
+        )
+      } else {
+        if (Math.abs(start) - Math.abs(end) > 1e-5) {
           callback(end)
-        case true:
-          res()
+        }
+        res()
       }
     }
 

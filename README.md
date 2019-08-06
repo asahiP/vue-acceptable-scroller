@@ -63,3 +63,33 @@ yarn run serve
 |       callback       |     到顶到底方法     |    N     |       object        |       -       |
 |    limitedLength     | 到顶到底后可拉伸距离 |    N     |       number        |      100      |
 | minScrollSliderSize  |     最小滑块大小     |    N     |       number        |      80       |
+
+## Method
+
+- **setScrollTop**
+
+```javascript
+/**
+ * @param {number} newVal
+ */
+
+// go bottom
+setScrollTop(Infinity)
+
+// go top
+setScrollTop(0)
+```
+
+- **setScrollLeft**
+
+```javascript
+/**
+ * @param {number} newVal
+ */
+
+// go right
+setScrollLeft(Infinity)
+
+// go left
+setScrollTop(0)
+```
