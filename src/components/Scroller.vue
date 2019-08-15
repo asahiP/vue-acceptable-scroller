@@ -6,12 +6,12 @@
     @touchstart="isMouseOver = true"
     @mouseleave="isMouseOver = false"
     @touchend="isMouseOver = false"
-    @wheel="sliderMouseWheel"
+    @wheel.stop="sliderMouseWheel"
   >
     <div
       ref="scrollerContent"
       :style="scrollerContentStyle"
-      @touchstart="scrollerContentTouchStart"
+      @touchstart.stop="scrollerContentTouchStart"
       @dragstart="(e) => e.preventDefault()"
       @transitionend="isInTransition = false"
     >

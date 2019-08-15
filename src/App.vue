@@ -4,6 +4,13 @@
         <div v-for="i in num" :key="i" :style="{
           background: `rgb(${Math.random() * 156 + 100}, ${Math.random() * 156 + 100}, ${Math.random() * 156 + 100})`
         }" v-text="i"></div>
+    <div style="width: 100%; height: 500px">
+      <Scroller>
+        <div v-for="i in num" :key="i" :style="{
+          background: `rgb(${Math.random() * 156 + 100}, ${Math.random() * 156 + 100}, ${Math.random() * 156 + 100})`
+        }" v-text="i"></div>
+      </Scroller>
+    </div>
     </Scroller>
   </div>
 </template>
