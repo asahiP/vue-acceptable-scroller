@@ -719,7 +719,7 @@ export default class Scroller extends Vue {
     let { $refs, $nextTick, getComputedStyle,
       sliderMouseMove, sliderMouseUp,
       scrollerContentTouchMove, scrollerContentTouchEnd } = this
-    let { scrollerContent }: any = $refs
+    let { scrollerContainer }: any = $refs
     let callback = getComputedStyle.bind(this)
     let self = this
 
@@ -733,7 +733,7 @@ export default class Scroller extends Vue {
     }
 
     ;(new MutationObserver(callback))
-      .observe(scrollerContent, config);
+      .observe(scrollerContainer, config);
 
     function keydownShift (e: KeyboardEvent) {
       if (e.keyCode === 16) self.isShiftPressed = true
