@@ -312,13 +312,9 @@ export default class Scroller extends Vue {
     
     if (containerWidth !== newContainerWidth) {
       setScrollLeft((sliderOffsetLeft / sliderScrollWidth || 0) * newSliderScrollWidth)
-    } else {
-      syncScrollLeft()
     }
     if (containerHeight !== newContainerHeight) {
       setScrollTop((sliderOffsetTop / sliderScrollHeight || 0) * newSliderScrollHeight)
-    } else {
-      syncScrollTop()
     }
   }
 
