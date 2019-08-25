@@ -6,12 +6,12 @@
     @touchstart="isMouseOver = true"
     @mouseleave="isMouseOver = false"
     @touchend="isMouseOver = false"
-    @wheel.stop="sliderMouseWheel"
+    @wheel="sliderMouseWheel"
   >
     <div
       ref="scrollerContent"
       :style="scrollerContentStyle"
-      @touchstart.stop="scrollerContentTouchStart"
+      @touchstart="scrollerContentTouchStart"
       @dragstart="(e) => e.preventDefault()"
       @transitionend="isInTransition = false"
     >
@@ -527,8 +527,9 @@ export default class Scroller extends Vue {
   bouncingAnimateCancelHandleY: Function = () => {}
 
   scrollerContentTouchStart (e: TouchEvent): void {
+    let { isOverFlowX, isOverFlowY } = this
     let { enableTouchMove } = this.mixingOption
-    if (enableTouchMove) {
+    if (isOverFlowX || isOverFlowY && enableTouchMove) {
       let { pageX, pageY } = e.touches[0]
       let { contentScrollLeft, contentScrollTop,
         bouncingAnimateCancelHandleX,
@@ -543,6 +544,7 @@ export default class Scroller extends Vue {
       this.touchEventTime = e.timeStamp
       bouncingAnimateCancelHandleX()
       bouncingAnimateCancelHandleY()
+      e.stopPropagation()
     }
   }
   scrollerContentTouchMove (e: TouchEvent): void {
@@ -575,6 +577,7 @@ export default class Scroller extends Vue {
         } else {
           setTranslateX(translateX, limitedLength)
         }
+        e.stopPropagation()
       }
       if (isOverFlowY) {
         let distance = pageY - touchStartFingerPositionY
@@ -589,6 +592,7 @@ export default class Scroller extends Vue {
         } else {
           setTranslateY(translateY, limitedLength)
         }
+        e.stopPropagation()
       }
       this.touchEndFingerPositionX = pageX
       this.touchEndFingerPositionY = pageY
