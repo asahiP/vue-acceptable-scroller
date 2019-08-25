@@ -447,18 +447,25 @@ export default class Scroller extends Vue {
     let { setTranslateX, setTranslateY,
       isShiftPressed,
       contentScrollTop, contentScrollLeft,
-      contentScrollWidth, contentScrollHeight } = this
+      contentScrollWidth, contentScrollHeight,
+      isOverFlowX, isOverFlowY } = this
     if (isShiftPressed) {
-      if (e.deltaY > 0) {
-        setTranslateX(contentScrollLeft - 24)
-      } else {
-        setTranslateX(contentScrollLeft + 24)
+      if (isOverFlowX) {
+        if (e.deltaY > 0) {
+          setTranslateX(contentScrollLeft - 24)
+        } else {
+          setTranslateX(contentScrollLeft + 24)
+        }
+        e.stopPropagation()
       }
     } else {
-      if (e.deltaY > 0) {
-        setTranslateY(contentScrollTop - 24)
-      } else {
-        setTranslateY(contentScrollTop + 24)
+      if (isOverFlowY) {
+        if (e.deltaY > 0) {
+          setTranslateY(contentScrollTop - 24)
+        } else {
+          setTranslateY(contentScrollTop + 24)
+        }
+        e.stopPropagation()
       }
     }
   }
