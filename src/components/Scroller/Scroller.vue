@@ -48,8 +48,8 @@
 
 <script lang="ts">
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
-import { getAbsPosition } from '../assets/lib/getAbsPosition'
-import animate from '../assets/lib/animate'
+import { getAbsPosition } from './lib/getAbsPosition'
+import animate from './lib/animate'
 
 interface IDefaultOption {
   [key: string]: any,
@@ -110,7 +110,7 @@ interface IscrollerStyle {
 
 @Component
 export default class Scroller extends Vue {
-  @Prop({ required: false, default: () => ({}) }) customOption!: ICustomOption
+  customOption: ICustomOption = {}
   
   defaultScrollerSliderWeight: number = 8
   defaultScrollerContainerStyle = {
@@ -760,6 +760,8 @@ export default class Scroller extends Vue {
     $nextTick(() => {
       callback()
     })
+
+    this.customOption = (Vue as any).$Scroller.option
   }
 }
 </script>

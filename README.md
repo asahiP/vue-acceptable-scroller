@@ -3,36 +3,49 @@
 ## Example
 
 ```vue
+<!-- App.vue -->
 <template>
   <div id="app">
-    <Scroller :customOption="yourOption">
-      <!-- Any content you want to scroll -->
+    <Scroller>
+      <!-- Whatever you want to scroll -->
     </Scroller>
   </div>
 </template>
 
 <script>
 import { Component, Vue } from 'vue-property-decorator'
-import Scroller from './components/Scroller.vue'
 
-@Component({
-  components: {
-    Scroller,
-  },
-})
-export default class App extends Vue {
-  yourOption: any = {
-    // some other option
-    callback: {
-      left () {},
-      top () {},
-      right () {},
-      bottom () {},
-    }
-  }
-}
+@Component
+export default class App extends Vue {}
 </script>
 ```
+
+```typescript
+// main.ts
+import Vue from 'vue'
+import App from './App.vue'
+import Scroller from './components/Scroller'
+
+Vue.config.productionTip = false
+
+Vue.use(Scroller, {
+  /** other option */
+  scrollerBarStyleX: { background: 'transparent' },
+  scrollerBarStyleY: { background: 'transparent' },
+  callback: {
+    left () {},
+    top () {},
+    right () {},
+    bottom () {},
+  }
+})
+
+new Vue({
+  render: h => h(App),
+}).$mount('#app')
+```
+
+
 
 ## Project setup
 

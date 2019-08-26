@@ -6,7 +6,7 @@
         }" v-text="i"></div>
     <div style="width: 100%; height: 500px">
       <Scroller>
-        <div v-for="i in 10" :key="i" :style="{
+        <div v-for="i in num" :key="i" :style="{
           background: `rgb(${Math.random() * 156 + 100}, ${Math.random() * 156 + 100}, ${Math.random() * 156 + 100})`
         }" v-text="i"></div>
       </Scroller>
@@ -17,13 +17,8 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import Scroller from './components/Scroller.vue'
 
-@Component({
-  components: {
-    Scroller,
-  },
-})
+@Component
 export default class App extends Vue {
   num: number = 100
 }
