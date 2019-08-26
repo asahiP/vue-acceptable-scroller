@@ -761,7 +761,7 @@ export default class Scroller extends Vue {
       callback()
     })
 
-    this.customOption = (Vue as any).$Scroller.option
+    this.customOption = Vue.prototype.$Scroller.option
   }
 }
 </script>
