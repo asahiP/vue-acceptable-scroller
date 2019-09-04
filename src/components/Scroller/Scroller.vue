@@ -722,12 +722,104 @@ export default class Scroller extends Vue {
     document.body.style.userSelect = !isMobile && isEventActive ? 'none' : ''
   }
 
+  keyDownEvent (e: KeyboardEvent): void {
+    let { keyCode, target } = e
+    let { isKeyDownEventActive } = Vue.prototype.$Scroller
+    let { isMouseOver } = this
+
+    if (!isMouseOver
+      || isKeyDownEventActive
+      || target !== document.body
+      || ![16, 33, 34, 35, 36, 37, 38, 39, 40].includes(keyCode)) return
+    if (keyCode === 16) {
+      this.isShiftPressed = true
+      return
+    }
+
+    Vue.prototype.$Scroller.isKeyDownEventActive = true
+    window.cancelAnimationFrame(Vue.prototype.$Scroller.keyDownRequest)
+
+    let self = this
+    let loop = () => {
+      let { setTranslateX, setTranslateY,
+        contentScrollLeft, contentScrollTop,
+        isShiftPressed, isInTransition } = self
+      
+      self.isInTransition = [33, 34, 35, 36].includes(keyCode) ? true : isInTransition
+      switch (keyCode) {
+        // ArrowUp
+        case 38:
+          setTranslateY(contentScrollTop + 24)
+          break
+        // ArrowDown
+        case 40:
+          setTranslateY(contentScrollTop - 24)
+          break
+        // ArrowLeft
+        case 37:
+          setTranslateX(contentScrollLeft + 24)
+          break
+        // ArrowRight
+        case 39:
+          setTranslateX(contentScrollLeft - 24)
+          break
+        // Home
+        case 36:
+          if (isShiftPressed) {
+            setTranslateX(0)
+          } else {
+            setTranslateY(0)
+          }
+          break
+        // End
+        case 35:
+          if (isShiftPressed) {
+            setTranslateX(-Infinity)
+          } else {
+            setTranslateY(-Infinity)
+          }
+          break
+        // PageUp
+        case 33:
+          if (isShiftPressed) {
+            setTranslateX(contentScrollLeft + 24 * 5)
+          } else {
+            setTranslateY(contentScrollTop + 24 * 5)
+          }
+          break
+        // PageDown
+        case 34:
+          if (isShiftPressed) {
+            setTranslateX(contentScrollLeft - 24 * 5)
+          } else {
+            setTranslateY(contentScrollTop - 24 * 5)
+          }
+      }
+
+      if (Vue.prototype.$Scroller.isKeyDownEventActive) {
+        Vue.prototype.$Scroller.keyDownRequest = window.requestAnimationFrame(loop)
+      }
+    }
+
+    Vue.prototype.$Scroller.keyDownRequest = window.requestAnimationFrame(loop)
+  }
+
+  keyUpEvent (e: KeyboardEvent): void {
+    if (e.keyCode === 16) {
+      this.isShiftPressed = false
+      return
+    }
+
+    window.cancelAnimationFrame(Vue.prototype.$Scroller.keyDownRequest)
+    Vue.prototype.$Scroller.isKeyDownEventActive = false
+  }
+
   mounted (): void {
     let { $refs, $nextTick, getComputedStyle,
       sliderMouseMove, sliderMouseUp,
-      scrollerContentTouchMove, scrollerContentTouchEnd } = this
+      scrollerContentTouchMove, scrollerContentTouchEnd,
+      keyDownEvent, keyUpEvent } = this
     let { scrollerContainer }: any = $refs
-    let callback = getComputedStyle.bind(this)
     let self = this
 
     let config = {
@@ -739,27 +831,18 @@ export default class Scroller extends Vue {
       subtree: true,
     }
 
-    ;(new MutationObserver(callback))
+    ;(new MutationObserver(getComputedStyle))
       .observe(scrollerContainer, config);
-
-    function keydownShift (e: KeyboardEvent) {
-      if (e.keyCode === 16) self.isShiftPressed = true
-    }
-    function keyUpShift (e: KeyboardEvent) {
-      if (e.keyCode === 16) self.isShiftPressed = false
-    }
-
-    window.addEventListener('resize', callback)
-    window.addEventListener('keydown', keydownShift)
-    window.addEventListener('keyup', keyUpShift)
-    window.addEventListener('mousemove', sliderMouseMove.bind(this))
-    window.addEventListener('mouseup', sliderMouseUp.bind(this))
-    window.addEventListener('touchmove', scrollerContentTouchMove.bind(this))
-    window.addEventListener('touchend', scrollerContentTouchEnd.bind(this))
     
-    $nextTick(() => {
-      callback()
-    })
+    window.addEventListener('resize', getComputedStyle)
+    window.addEventListener('mousemove', sliderMouseMove)
+    window.addEventListener('mouseup', sliderMouseUp)
+    window.addEventListener('touchmove', scrollerContentTouchMove)
+    window.addEventListener('touchend', scrollerContentTouchEnd)
+    window.addEventListener('keydown', keyDownEvent)
+    window.addEventListener('keyup', keyUpEvent)
+    
+    $nextTick(getComputedStyle)
 
     this.customOption = Vue.prototype.$Scroller.option
   }

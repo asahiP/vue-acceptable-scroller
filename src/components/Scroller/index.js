@@ -3,6 +3,8 @@ import Scroller from './Scroller.vue'
 export default function (Vue, option = {}) {
   Vue.component('Scroller', Scroller)
   Vue.prototype.$Scroller = {
-    option
+    option,
+    isKeyDownEventActive: false,
+    keyDownRequest: 0,
   }
 }
