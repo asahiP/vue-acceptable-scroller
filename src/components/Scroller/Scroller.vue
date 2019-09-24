@@ -719,7 +719,12 @@ export default class Scroller extends Vue {
   @Watch('isEventActive')
   triggerUserSelect (): void {
     let { isMobile, isEventActive } = this
-    document.body.style.userSelect = !isMobile && isEventActive ? 'none' : ''
+
+    isEventActive = !isMobile && isEventActive
+
+    document.body.style['msUserSelect'] = isEventActive ? 'none' : ''
+    document.body.style['userSelect'] = isEventActive ? 'none' : ''
+    document.body.style['webkitUserSelect'] = isEventActive ? 'none' : ''
   }
 
   keyDownEvent (e: KeyboardEvent): void {
