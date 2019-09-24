@@ -1,6 +1,6 @@
 import Scroller from './Scroller.vue'
 
-export default function (Vue, option = {}) {
+export default function install (Vue, option = {}) {
   Vue.component('Scroller', Scroller)
   Vue.prototype.$Scroller = {
     option,
