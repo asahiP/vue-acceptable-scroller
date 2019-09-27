@@ -1,7 +1,7 @@
 <template>
   <div
     ref="scrollerContainer"
-    :style="defaultScrollerContainerStyle"
+    :style="containerStyle"
     @mouseenter="isMouseOver = !isMobile"
     @touchstart="isMouseOver = true"
     @mouseleave="isMouseOver = false"
@@ -51,69 +51,23 @@ import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
 import { getAbsPosition } from './lib/getAbsPosition'
 import animate from './lib/animate'
 
-interface IDefaultOption {
-  [key: string]: any,
-  enableScrollerX: boolean,
-  enableScrollerY: boolean,
-  enableTouchMove: boolean,
-  autoHiddenScrollerX: boolean,
-  autoHiddenScrollerY: boolean,
-  scrollerBarStyleX: IscrollerStyle,
-  scrollerBarStyleY: IscrollerStyle,
-  scrollerSliderStyleX: IscrollerStyle,
-  scrollerSliderStyleY: IscrollerStyle,
-  enableCallback: boolean,
-  callback: IScrollerCallback,
-  minScrollSliderSize: number,
-  limitedLength: number,
-}
+type enableScroll = 'x' | 'y' | 'both'
 
-interface ICustomOption {
-  [key: string]: any,
-  enableScrollerX?: boolean,
-  enableScrollerY?: boolean,
-  enableTouchMove?: boolean,
-  autoHiddenScrollerX?: boolean,
-  autoHiddenScrollerY?: boolean,
-  scrollerBarStyleX?: IscrollerStyle,
-  scrollerBarStyleY?: IscrollerStyle,
-  scrollerSliderStyleX?: IscrollerStyle,
-  scrollerSliderStyleY?: IscrollerStyle,
-  enableCallback?: boolean,
-  callback?: IScrollerCallback,
-  minScrollSliderSize?: number,
-  limitedLength?: number
-}
-
-interface IScrollerCallback {
-  left?: Function,
-  top?: Function,
-  right?: Function,
-  bottom?: Function,
-}
-
-interface IscrollerStyle {
-  position: string,
-  top?: string | number,
-  left?: string | number,
-  bottom?: string | number,
-  right?: string | number,
-
-  width: string,
-  height: string,
-  overflow?: string,
-
-  background: string,
-
-  transition?: string,
+interface option {
+  enableScroll: enableScroll
+  enableTouchMove: boolean
+  autoHide: boolean
+  barStyle?: any
+  sliderStyle?: any
+  limitedLength: number
+  minSize: number
+  throttle: number
 }
 
 @Component
 export default class Scroller extends Vue {
-  customOption: ICustomOption = {}
   
-  defaultScrollerSliderWeight: number = 8
-  defaultScrollerContainerStyle = {
+  containerStyle = {
     position: 'relative',
 
     width: '100%',
@@ -121,13 +75,13 @@ export default class Scroller extends Vue {
     overflow: 'hidden',
   }
 
-  defaultScrollerBarStyle: IscrollerStyle = {
+  defaultBarStyle = {
     position: 'absolute',
     bottom: 0,
     right: 0,
 
-    width: `${this.defaultScrollerSliderWeight}px`,
-    height: `${this.defaultScrollerSliderWeight}px`,
+    width: '100%',
+    height: '100%',
     overflow: 'hidden',
 
     background: 'rgb(220, 220, 220)',
@@ -135,48 +89,24 @@ export default class Scroller extends Vue {
     transition: 'opacity .4s ease',
   }
 
-  defaultScrollerSliderStyle: IscrollerStyle = {
+  defaultSliderStyle = {
     position: 'absolute',
     top: 0,
     left: 0,
 
-    width: `${this.defaultScrollerSliderWeight}px`,
-    height: `${this.defaultScrollerSliderWeight}px`,
+    width: '100%',
+    height: '100%',
 
     background: 'rgb(155, 155, 155)',
   }
 
-  defaultOption: IDefaultOption = {
-    enableScrollerX: true,
-    enableScrollerY: true,
+  option: option = {
+    enableScroll: 'both',
     enableTouchMove: true,
-    autoHiddenScrollerX: true,
-    autoHiddenScrollerY: true,
-    scrollerBarStyleX: Object.assign({}, this.defaultScrollerBarStyle, { width: '100%' }),
-    scrollerBarStyleY: Object.assign({}, this.defaultScrollerBarStyle, { height: '100%' }),
-    scrollerSliderStyleX: Object.assign({}, this.defaultScrollerSliderStyle, { width: '100%' }),
-    scrollerSliderStyleY: Object.assign({}, this.defaultScrollerSliderStyle, { height: '100%' }),
-    enableCallback: false,
-    callback: {},
-    minScrollSliderSize: 80,
+    autoHide: true,
     limitedLength: 100,
-  }
-
-  get mixingOption (): IDefaultOption {
-    let { defaultOption, customOption } = this
-    let mixied: { [key: string]: any } = {}
-
-    for (let i of Object.keys(customOption)) {
-      if (defaultOption.hasOwnProperty(i)) {
-        if (typeof customOption[i] === 'object' && !Array.isArray(customOption[i])) {
-          mixied[i] = Object.assign({}, defaultOption[i], customOption[i])
-        } else {
-          mixied[i] = customOption[i]
-        }
-      }
-    }
-
-    return Object.assign({}, defaultOption, mixied)
+    minSize: 50,
+    throttle: 300,
   }
 
   containerWidth: number = 0
@@ -233,30 +163,30 @@ export default class Scroller extends Vue {
     return contentHeight > containerHeight
   }
   get scrollerBarStyleX (): any {
-    let { scrollerBarStyleX, autoHiddenScrollerX, enableScrollerX } = this.mixingOption
-    let { isOverFlowX, isMouseOver, isEventActive, isInTransition } = this
+    let { barStyle, autoHide, enableScroll } = this.option
+    let { isOverFlowX, isMouseOver, isEventActive, isInTransition, defaultBarStyle } = this
 
-    return Object.assign({}, scrollerBarStyleX, {
-      display: enableScrollerX && isOverFlowX ? 'block' : 'none',
+    return Object.assign({}, defaultBarStyle, { height: '8px' }, barStyle, {
+      display: ['x', 'both'].includes(enableScroll) && isOverFlowX ? 'block' : 'none',
 
-      opacity: autoHiddenScrollerX && !isMouseOver && !isEventActive && !isInTransition ? 0 : 1,
+      opacity: autoHide && !isMouseOver && !isEventActive && !isInTransition ? 0 : 1,
     })
   }
   get scrollerBarStyleY (): any {
-    let { scrollerBarStyleY, autoHiddenScrollerY, enableScrollerY } = this.mixingOption
-    let { isOverFlowY, isMouseOver, isEventActive, isInTransition } = this
+    let { barStyle, autoHide, enableScroll } = this.option
+    let { isOverFlowY, isMouseOver, isEventActive, isInTransition, defaultBarStyle } = this
 
-    return Object.assign({}, scrollerBarStyleY, {
-      display: enableScrollerY && isOverFlowY ? 'block' : 'none',
+    return Object.assign({}, defaultBarStyle, { width: '8px' }, barStyle, {
+      display: ['y', 'both'].includes(enableScroll) && isOverFlowY ? 'block' : 'none',
 
-      opacity: autoHiddenScrollerY && !isMouseOver && !isEventActive && !isInTransition ? 0 : 1,
+      opacity: autoHide && !isMouseOver && !isEventActive && !isInTransition ? 0 : 1,
     })
   }
   get scrollerSliderStyleX (): any {
-    let { scrollerSliderStyleX } = this.mixingOption
-    let { sliderWidth, sliderOffsetLeft, isInTransition } = this
+    let { sliderStyle } = this.option
+    let { sliderWidth, sliderOffsetLeft, isInTransition, defaultSliderStyle } = this
 
-    return Object.assign({}, scrollerSliderStyleX, {
+    return Object.assign({}, defaultSliderStyle, sliderStyle, {
       width: `${sliderWidth}px`,
 
       transform: `translate3d(${Math.round(sliderOffsetLeft)}px, 0, 0)`,
@@ -264,10 +194,10 @@ export default class Scroller extends Vue {
     })
   }
   get scrollerSliderStyleY (): any {
-    let { scrollerSliderStyleY } = this.mixingOption
-    let { sliderHeight, sliderOffsetTop, isInTransition } = this
+    let { sliderStyle } = this.option
+    let { sliderHeight, sliderOffsetTop, isInTransition, defaultSliderStyle } = this
     
-    return Object.assign({}, scrollerSliderStyleY, {
+    return Object.assign({}, defaultSliderStyle, sliderStyle, {
       height: `${sliderHeight}px`,
 
       transform: `translate3d(0, ${Math.round(sliderOffsetTop)}px, 0)`,
@@ -297,13 +227,13 @@ export default class Scroller extends Vue {
     this.contentHeight = scrollerContent.scrollHeight
 
     let { containerWidth: newContainerWidth, contentWidth,
-      containerHeight: newContainerHeight, contentHeight, mixingOption } = this
-    let { minScrollSliderSize } = mixingOption
+      containerHeight: newContainerHeight, contentHeight, option } = this
+    let { minSize } = option
     let scrollerSliderWidth = (newContainerWidth / contentWidth || 0) * newContainerWidth
     let scrollerSliderHeight = (newContainerHeight / contentHeight || 0) * newContainerHeight
     
-    this.sliderWidth = Math.max(scrollerSliderWidth, minScrollSliderSize)
-    this.sliderHeight = Math.max(scrollerSliderHeight, minScrollSliderSize)
+    this.sliderWidth = Math.max(scrollerSliderWidth, minSize)
+    this.sliderHeight = Math.max(scrollerSliderHeight, minSize)
 
     let { sliderScrollWidth: newSliderScrollWidth,
       sliderScrollHeight: newSliderScrollHeight,
@@ -528,7 +458,7 @@ export default class Scroller extends Vue {
 
   scrollerContentTouchStart (e: TouchEvent): void {
     let { isOverFlowX, isOverFlowY } = this
-    let { enableTouchMove } = this.mixingOption
+    let { enableTouchMove } = this.option
     if (isOverFlowX || isOverFlowY && enableTouchMove) {
       let { pageX, pageY } = e.touches[0]
       let { contentScrollLeft, contentScrollTop,
@@ -548,13 +478,12 @@ export default class Scroller extends Vue {
     }
   }
   scrollerContentTouchMove (e: TouchEvent): void {
-    let { isEventActive, mixingOption } = this
-    let { enableTouchMove } = mixingOption
+    let { isEventActive, option } = this
+    let { enableTouchMove, limitedLength } = option
 
     if (enableTouchMove && isEventActive) {
       let { pageX, pageY } = e.touches[0]
       let { isOverFlowX, isOverFlowY,
-        mixingOption,
         touchEventTime,
         touchStartFingerPositionX,
         touchStartFingerPositionY,
@@ -562,7 +491,6 @@ export default class Scroller extends Vue {
         touchStartContentPositionY,
         setTranslateX, setTranslateY,
         contentScrollWidth, contentScrollHeight } = this
-      let { limitedLength } = mixingOption
       
       if (isOverFlowX) {
         let distance = pageX - touchStartFingerPositionX
@@ -599,8 +527,8 @@ export default class Scroller extends Vue {
     }
   }
   scrollerContentTouchEnd (e: TouchEvent): void {
-    let { isEventActive, mixingOption } = this
-    let { enableTouchMove } = mixingOption
+    let { isEventActive, option } = this
+    let { enableTouchMove } = option
 
     if (enableTouchMove && isEventActive) {
       let { touchEventTime,
@@ -638,8 +566,8 @@ export default class Scroller extends Vue {
     let { contentScrollWidth, contentScrollHeight,
       contentScrollLeft, contentScrollTop,
       setTranslateX, setTranslateY,
-      mixingOption } = this
-    let { limitedLength, enableCallback, callback } = mixingOption
+      option } = this
+    let { limitedLength } = option
     if (contentScrollLeft < contentScrollWidth * -1 || contentScrollLeft > 0) {
       let Animate
       if (contentScrollLeft > 0) {
@@ -651,13 +579,6 @@ export default class Scroller extends Vue {
             setTranslateX(contentScrollLeft + currentStep, limitedLength)
           }
         })
-
-        try {
-          enableCallback
-            && contentScrollLeft === limitedLength
-            && callback.left
-            && callback.left()
-        } catch (e) { e }
       } else {
         Animate = animate({
           end: Math.abs(contentScrollLeft + contentScrollWidth),
@@ -667,13 +588,6 @@ export default class Scroller extends Vue {
             setTranslateX(contentScrollLeft + currentStep, limitedLength)
           }
         })
-
-        try {
-          enableCallback
-            && Math.abs(contentScrollLeft + contentScrollWidth) === limitedLength
-            && callback.right
-            && callback.right()
-        } catch (e) { e }
       }
       this.bouncingAnimateCancelHandleX = Animate.cancel
     }
@@ -688,13 +602,6 @@ export default class Scroller extends Vue {
             setTranslateY(contentScrollTop + currentStep, limitedLength)
           }
         })
-
-        try {
-          enableCallback
-            && contentScrollTop === limitedLength
-            && callback.top
-            && callback.top()
-        } catch (e) { e }
       } else {
         Animate = animate({
           end: Math.abs(contentScrollTop + contentScrollHeight),
@@ -704,13 +611,6 @@ export default class Scroller extends Vue {
             setTranslateY(contentScrollTop + currentStep, limitedLength)
           }
         })
-
-        try {
-          enableCallback
-            && Math.abs(contentScrollTop + contentScrollHeight) === limitedLength
-            && callback.bottom
-            && callback.bottom()
-        } catch (e) { e }
       }
       this.bouncingAnimateCancelHandleY = Animate.cancel
     }
@@ -849,7 +749,7 @@ export default class Scroller extends Vue {
     
     $nextTick(getComputedStyle)
 
-    this.customOption = Vue.prototype.$Scroller.option
+    this.option = Object.assign({}, this.option, Vue.prototype.$Scroller.option)
   }
 }
 </script>
