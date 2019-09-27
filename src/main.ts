@@ -4,7 +4,7 @@ import Scroller from './components/Scroller'
 
 Vue.config.productionTip = false
 
-Vue.use(Scroller, { barStyle: { background: 'transparent' } })
+Vue.use(Scroller)
 
 new Vue({
   render: h => h(App),

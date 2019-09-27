@@ -81,8 +81,8 @@ export default class Scroller extends Vue {
     bottom: 0,
     right: 0,
 
-    width: '100%',
-    height: '100%',
+    width: '8px',
+    height: '8px',
     overflow: 'hidden',
 
     background: 'rgb(220, 220, 220)',
@@ -167,8 +167,10 @@ export default class Scroller extends Vue {
     let { barStyle, autoHide, enableScroll } = this.option
     let { isOverFlowX, isMouseOver, isEventActive, isInTransition, defaultBarStyle } = this
 
-    return Object.assign({}, defaultBarStyle, { height: '8px' }, barStyle, {
+    return Object.assign({}, defaultBarStyle, barStyle, {
       display: ['x', 'both'].includes(enableScroll) && isOverFlowX ? 'block' : 'none',
+
+      width: '100%',
 
       opacity: autoHide && !isMouseOver && !isEventActive && !isInTransition ? 0 : 1,
     })
@@ -177,8 +179,10 @@ export default class Scroller extends Vue {
     let { barStyle, autoHide, enableScroll } = this.option
     let { isOverFlowY, isMouseOver, isEventActive, isInTransition, defaultBarStyle } = this
 
-    return Object.assign({}, defaultBarStyle, { width: '8px' }, barStyle, {
+    return Object.assign({}, defaultBarStyle, barStyle, {
       display: ['y', 'both'].includes(enableScroll) && isOverFlowY ? 'block' : 'none',
+
+      height: '100%',
 
       opacity: autoHide && !isMouseOver && !isEventActive && !isInTransition ? 0 : 1,
     })
