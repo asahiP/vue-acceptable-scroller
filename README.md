@@ -6,7 +6,7 @@
 <!-- App.vue -->
 <template>
   <div id="app">
-    <Scroller>
+    <Scroller :hook="hook">
       <!-- Whatever you want to scroll -->
     </Scroller>
   </div>
@@ -16,7 +16,11 @@
 import { Component, Vue } from 'vue-property-decorator'
 
 @Component
-export default class App extends Vue {}
+export default class App extends Vue {
+    hook (left, top) {
+        /** Your code */
+    }
+}
 </script>
 ```
 
@@ -28,17 +32,7 @@ import Scroller from './components/Scroller'
 
 Vue.config.productionTip = false
 
-Vue.use(Scroller, {
-  /** other option */
-  scrollerBarStyleX: { background: 'transparent' },
-  scrollerBarStyleY: { background: 'transparent' },
-  callback: {
-    left () {},
-    top () {},
-    right () {},
-    bottom () {},
-  }
-})
+Vue.use(Scroller, { /** Your option */ })
 
 new Vue({
   render: h => h(App),
