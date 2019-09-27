@@ -66,6 +66,7 @@ interface option {
 
 @Component
 export default class Scroller extends Vue {
+  @Prop({ required: false }) hook!: Function
   
   containerStyle = {
     position: 'relative',
@@ -379,21 +380,22 @@ export default class Scroller extends Vue {
       contentScrollTop, contentScrollLeft,
       contentScrollWidth, contentScrollHeight,
       isOverFlowX, isOverFlowY } = this
+    let distance = 24 * 3
     if (isShiftPressed) {
       if (isOverFlowX) {
         if (e.deltaY > 0) {
-          setTranslateX(contentScrollLeft - 24)
+          setTranslateX(contentScrollLeft - distance)
         } else {
-          setTranslateX(contentScrollLeft + 24)
+          setTranslateX(contentScrollLeft + distance)
         }
         e.stopPropagation()
       }
     } else {
       if (isOverFlowY) {
         if (e.deltaY > 0) {
-          setTranslateY(contentScrollTop - 24)
+          setTranslateY(contentScrollTop - distance)
         } else {
-          setTranslateY(contentScrollTop + 24)
+          setTranslateY(contentScrollTop + distance)
         }
         e.stopPropagation()
       }
@@ -421,7 +423,7 @@ export default class Scroller extends Vue {
       case 'sliderX':
         scrollBarAnimateCancelHandle = animate({
           end: endX,
-          step: endX > 0 ? 8 : -8,
+          step: endX > 0 ? 10 : -10,
           callback: (currentStep: number) => {
             setScrollLeft(Math.max(sliderOffsetLeft + currentStep, 0))
           }
@@ -430,7 +432,7 @@ export default class Scroller extends Vue {
       case 'sliderY':
         scrollBarAnimateCancelHandle = animate({
           end: endY,
-          step: endY > 0 ? 8 : -8,
+          step: endY > 0 ? 10 : -10,
           callback: (currentStep: number) => {
             setScrollTop(Math.max(sliderOffsetTop + currentStep, 0))
           }
@@ -617,7 +619,7 @@ export default class Scroller extends Vue {
   }
 
   @Watch('isEventActive')
-  triggerUserSelect (): void {
+  toggleUserSelect (): void {
     let { isMobile, isEventActive } = this
 
     isEventActive = !isMobile && isEventActive
@@ -625,6 +627,26 @@ export default class Scroller extends Vue {
     document.body.style['msUserSelect'] = isEventActive ? 'none' : ''
     document.body.style['userSelect'] = isEventActive ? 'none' : ''
     document.body.style['webkitUserSelect'] = isEventActive ? 'none' : ''
+  }
+
+  triggered: boolean = false
+
+  @Watch('contentScrollLeft')
+  @Watch('contentScrollTop')
+  trigger (): void {
+    let { hook, contentScrollLeft, contentScrollTop, triggered, option } = this
+    let { throttle } = option
+    let isFunction = typeof hook === 'function'
+
+    if (isFunction && !triggered && throttle > 0) {
+      this.triggered = true
+
+      hook(contentScrollLeft, contentScrollTop)
+
+      setTimeout(() => this.triggered = false, throttle)
+    } else if (isFunction && !triggered) {
+      hook(contentScrollLeft, contentScrollTop)
+    }
   }
 
   keyDownEvent (e: KeyboardEvent): void {
@@ -687,17 +709,17 @@ export default class Scroller extends Vue {
         // PageUp
         case 33:
           if (isShiftPressed) {
-            setTranslateX(contentScrollLeft + 24 * 5)
+            setTranslateX(contentScrollLeft + 24 * 3)
           } else {
-            setTranslateY(contentScrollTop + 24 * 5)
+            setTranslateY(contentScrollTop + 24 * 3)
           }
           break
         // PageDown
         case 34:
           if (isShiftPressed) {
-            setTranslateX(contentScrollLeft - 24 * 5)
+            setTranslateX(contentScrollLeft - 24 * 3)
           } else {
-            setTranslateY(contentScrollTop - 24 * 5)
+            setTranslateY(contentScrollTop - 24 * 3)
           }
       }
 
